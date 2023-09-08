@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-	'create_sphere = warmup_project.create_sphere:main'
-        ],
+	'create_sphere = warmup_project.create_sphere:main',
+        'teleop = warmup_project.teleop:main'
+ ],
     },
 )
