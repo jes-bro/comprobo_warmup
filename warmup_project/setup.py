@@ -21,7 +21,9 @@ setup(
     entry_points={
         'console_scripts': [
 	'create_sphere = warmup_project.create_sphere:main',
-        'teleop = warmup_project.teleop:main'
+        'teleop = warmup_project.teleop:main',
+	'drive_square = warmup_project.drive_square:main',
+	'wall_follower = warmup_project.wall_follower:main'
  ],
     },
 )
