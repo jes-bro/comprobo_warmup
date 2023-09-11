@@ -18,7 +18,7 @@ class CreateSphereNode(Node):
         msg = Marker()
         msg.pose.position.x = 1.0
         msg.pose.position.y = 2.0
-        msg.header.frame_id = 'odom'
+        msg.header.frame_id = 'base_link'
         msg.type = Marker.SPHERE
         msg.pose.orientation.x = 0.0
         msg.pose.orientation.y = 0.0

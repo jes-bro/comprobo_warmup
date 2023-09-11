@@ -40,13 +40,14 @@ class DriveSquareNode(Node):
 
     def turn_left(self, msg):
         print("Got to turn left")
-        msg.linear.x = 0.2
-        msg.angular.z = 0.1
+        msg.linear.x = 0.0
+        msg.angular.z = 0.5
         self.pub.publish(msg)
-        sleep(3)
+        sleep(3.3)
         msg.linear.x = 0.0
         msg.angular.z = 0.0
         self.pub.publish(msg)
+
 
     def run_loop(self):
         msg = Twist()

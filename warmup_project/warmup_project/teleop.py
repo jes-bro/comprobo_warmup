@@ -15,7 +15,7 @@ class TeleopNode(Node):
         super().__init__('teleop_node')
         # Args: interval between invocations of the timer (period), (callback)
         self.create_timer(0.1, self.run_loop) # executes run loop 10x a second - how does callback work exactly
-                # create publisher to publish messages to topic
+        # create publisher to publish messages to topic
         self.pub = self.create_publisher(Twist, 'cmd_vel', 10)
 
     def getKey(self):
@@ -36,6 +36,7 @@ class TeleopNode(Node):
 
         if key == 'w':
             msg.linear.x = 0.2
+            msg.angular.x = 0.1
 
         self.pub.publish(msg)
 
