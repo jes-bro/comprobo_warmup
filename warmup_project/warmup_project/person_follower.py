@@ -26,7 +26,7 @@ class PersonFollowerNode(Node):
 
     def process_scan(self, laser_data):
         ranges = laser_data.ranges
-        self.ranges = ranges[315:] + ranges[:45]
+        self.ranges = ranges[:45] + ranges[315:] 
     
     def move_forward(self, msg):
         msg.linear.x = 0.05
