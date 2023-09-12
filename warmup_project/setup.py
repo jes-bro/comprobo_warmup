@@ -23,7 +23,7 @@ setup(
 	'create_sphere = warmup_project.create_sphere:main',
         'teleop = warmup_project.teleop:main',
 	'drive_square = warmup_project.drive_square:main',
-	'wall_follower = warmup_project.wall_follower:main'
+	'wall_follower = warmup_project.wall_follower:main',
 	'person_follower = warmup_project.person_follower:main'
  ],
     },
