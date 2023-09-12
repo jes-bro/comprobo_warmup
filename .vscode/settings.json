@@ -1,0 +1,20 @@
+{
+  "python.autoComplete.extraPaths": [
+    "/home/jessica/ros2_ws/build/neato_node2",
+    "/home/jessica/ros2_ws/install/neato_node2/lib/python3.10/site-packages",
+    "/home/jessica/ros2_ws/install/neato2_interfaces/local/lib/python3.10/dist-packages",
+    "/home/jessica/ros2_ws/build/in_class_day02",
+    "/home/jessica/ros2_ws/install/in_class_day02/lib/python3.10/site-packages",
+    "/opt/ros/humble/lib/python3.10/site-packages",
+    "/opt/ros/humble/local/lib/python3.10/dist-packages"
+  ],
+  "python.analysis.extraPaths": [
+    "/home/jessica/ros2_ws/build/neato_node2",
+    "/home/jessica/ros2_ws/install/neato_node2/lib/python3.10/site-packages",
+    "/home/jessica/ros2_ws/install/neato2_interfaces/local/lib/python3.10/dist-packages",
+    "/home/jessica/ros2_ws/build/in_class_day02",
+    "/home/jessica/ros2_ws/install/in_class_day02/lib/python3.10/site-packages",
+    "/opt/ros/humble/lib/python3.10/site-packages",
+    "/opt/ros/humble/local/lib/python3.10/dist-packages"
+  ]
+}

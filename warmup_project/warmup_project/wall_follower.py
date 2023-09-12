@@ -15,7 +15,7 @@ from time import sleep
 class WallFollowerNode(Node):
 
     def __init__(self):
-        super().__init__('square_node')
+        super().__init__('wall_follower_node')
         # Args: interval between invocations of the timer (period), (callback)
         self.create_timer(0.1, self.run_loop) # executes run loop 10x a second - how does callback work exactly
         self.create_subscription(LaserScan, 'scan', self.process_scan, 10)
