@@ -22,11 +22,23 @@ class PersonFollowerNode(Node):
         # create publisher to publish messages to topic
         self.pub = self.create_publisher(Twist, 'cmd_vel', 10)
         self.ranges = []
-        self.follow_distance = 5
+        self.follow_distance = 1
 
     def process_scan(self, laser_data):
         ranges = laser_data.ranges
-        self.ranges = ranges[:45] + ranges[315:] 
+        ranges_list = list(ranges)
+        # print(f"ranges list: {ranges_list}")
+        ranges_left = ranges_list[0:45]
+        ranges_right = ranges_list[314:359]
+
+        ranges_left_reversed = []
+        ranges_right_reversed = []
+
+        for i in reversed(range(0, 45)):
+            ranges_left_reversed.append(ranges_left[i])
+            ranges_right_reversed.append(ranges_right[i])
+
+        self.ranges = ranges_left_reversed + ranges_right_reversed
     
     def move_forward(self, msg):
         msg.linear.x = 0.05
@@ -47,14 +59,14 @@ class PersonFollowerNode(Node):
         self.pub.publish(msg)
 
     def turn_left(self, msg):
-        msg.angular.z = 0.5
+        msg.angular.z = 0.1
         self.pub.publish(msg)
         sleep(0.1)
         msg.angular.z = 0.0
         self.pub.publish(msg)
     
     def turn_right(self, msg):
-        msg.angular.z = -0.5
+        msg.angular.z = -0.1
         self.pub.publish(msg)
         sleep(0.1)
         msg.angular.z = 0.0
@@ -63,28 +75,33 @@ class PersonFollowerNode(Node):
 
     def run_loop(self):
         msg = Twist()
-
+        print("loop")
         # Check to see if LIDAR data empty
         if (len(self.ranges) == 0):
+            print("Empty!")
             return
         
-        closest_point = min(self.ranges)
+        ranges_copy = self.ranges
+        closest_point = min(ranges_copy)
+        print(f"ranges: {ranges_copy}")
+        print(f"closest point: {closest_point}")
 
-        closest_point_idx = self.ranges.index(closest_point)
+        closest_point_idx = ranges_copy.index(closest_point)
 
         # Index corresponds to point's angle relative to NEATO
         angular_error = closest_point_idx - 45
+        print(f"angular error: {angular_error}")
 
         # Adjust angular position (rotate)
         if (not (-5 < angular_error < 5)):
-            if (angular_error < 0):
+            if (angular_error > 0):
                 self.turn_right(msg)
             else:
                 self.turn_left(msg)
             return
 
         # Adjust linear position (translate)
-        if (not abs(self.follow_distance - closest_point) > 1):
+        if (not abs(self.follow_distance - closest_point) < 0.2):
             if (self.follow_distance - closest_point < 0):
                 self.move_forward(msg)
             else:
