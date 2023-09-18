@@ -26,6 +26,7 @@ class FiniteStateControllerNode(Node):
         # create publisher to publish messages to topic
         self.pub = self.create_publisher(Twist, "cmd_vel", 10)
         self.ranges = []
+        self.max_scan_distance = 5
         self.follow_distance = 1
         self.state = "drive_square"
 
@@ -43,7 +44,10 @@ class FiniteStateControllerNode(Node):
             ranges_left_reversed.append(ranges_left[i])
             ranges_right_reversed.append(ranges_right[i])
 
-        self.ranges = ranges_left_reversed + ranges_right_reversed
+        ranges_front = ranges_left_reversed + ranges_right_reversed
+        self.ranges = [
+            math.inf if x > self.max_scan_distance else x for x in ranges_front
+        ]
 
     def move_forward(self, msg):
         msg.linear.x = 0.05
@@ -132,7 +136,7 @@ class FiniteStateControllerNode(Node):
                         return
 
                     # Adjust linear position (translate)
-                    if not abs(self.follow_distance - closest_point) < 0.2:
+                    if not abs(self.follow_distance - closest_point) < 0.1:
                         if self.follow_distance - closest_point < 0:
                             self.move_forward(msg)
                         else:

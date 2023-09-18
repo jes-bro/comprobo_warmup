@@ -26,7 +26,7 @@ class PersonFollowerNode(Node):
         # create publisher to publish messages to topic
         self.pub = self.create_publisher(Twist, "cmd_vel", 10)
         self.ranges = []
-        self.max_scan_distance = 10
+        self.max_scan_distance = 5
         self.follow_distance = 1
 
     def process_scan(self, laser_data):
