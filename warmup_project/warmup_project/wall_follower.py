@@ -10,6 +10,10 @@ import tty
 import select
 import sys
 import termios
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
+from math import sin, cos, radians
 from time import sleep
 
 class WallFollowerNode(Node):
@@ -25,11 +29,66 @@ class WallFollowerNode(Node):
         self.line_2_distance = 1
 
     def process_scan(self, laser_data):
-        ranges = laser_data.ranges
-        self.line_1_distance = ranges[135]
-        self.line_2_distance = ranges[45]
+        self.ranges = np.array(list(laser_data.ranges))
+        print(f"ranges: {self.ranges}")
+        self.line_1_distance = self.ranges[135]
+        self.line_2_distance = self.ranges[45]
         print("-------------------------")
+        points = self.polar_to_cartesian()
+        accumulator = self.generate_hough_space(points)
+        self.generate_heat_map(accumulator)
 
+    def polar_to_cartesian(self):
+        points = []
+        for angle in range(len(self.ranges)):
+            point = (self.ranges[angle]*cos(radians(angle)), self.ranges[angle]*sin(radians(angle)))
+            points.append(point)
+        return points
+
+    def generate_hough_space(self, points):
+
+        thetas = np.linspace(0, np.pi, 180)
+        r_min, r_max, r_step = -5, 5, 0.025
+        r_values = np.arange(r_min, r_max + r_step, r_step)
+        
+        # Initialize matrix with zeros
+        accumulator = np.zeros((len(r_values), len(thetas)))
+        
+        for point in points:
+            for index, theta in enumerate(thetas):
+                r = point[0] * cos(theta) + point[1] * sin(theta)
+                
+                # Find the corresponding r bucket
+                r_bucket = int((r - r_min) / r_step)
+                
+                if 0 <= r_bucket < len(r_values):
+                    accumulator[r_bucket][index] += 1
+                    
+        return accumulator
+    
+    def generate_heat_map(self, accumulator):
+        # Generate a figure and axis
+        fig, ax = plt.subplots(figsize=(10, 10))
+        
+        # Create heatmap
+        sns.heatmap(accumulator, cmap='viridis', ax=ax)
+
+        # Define x and y labels
+        ax.set_xlabel('Theta (radians)')
+        ax.set_ylabel('$\\rho$ (meters)')
+        ax.set_title("Hough Space: $\\rho - \\theta$ Parameterization")
+        
+        # Set y-limits
+        r_min, r_max, r_step = -5, 5, 0.025
+        ax.set_ylim(len(accumulator) - 1, 0)  # Reverse the limits as heatmaps usually plot top-down
+        
+        # Adjust y-ticks
+        r_values = np.arange(r_min, r_max + r_step, r_step)
+        y_ticks = np.arange(0, len(r_values), 10)  # Show every 5th tick for clarity, adjust as needed
+        ax.set_yticks(y_ticks)
+        ax.set_yticklabels([round(r_values[i], 2) for i in y_ticks])
+        
+        plt.show()
     
     def move_forward(self, msg):
         msg.linear.x = 0.05
