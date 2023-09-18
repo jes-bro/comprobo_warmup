@@ -15,9 +15,9 @@ from time import sleep
 import math
 
 
-class PersonFollowerNode(Node):
+class FiniteStateControllerNode(Node):
     def __init__(self):
-        super().__init__("person_follower_node")
+        super().__init__("finite_state_controller_node")
         # Args: interval between invocations of the timer (period), (callback)
         self.create_timer(
             0.1, self.run_loop
@@ -28,6 +28,7 @@ class PersonFollowerNode(Node):
         self.ranges = []
         self.max_scan_distance = 5
         self.follow_distance = 1
+        self.state = "drive_square"
 
     def process_scan(self, laser_data):
         ranges = laser_data.ranges
@@ -80,6 +81,24 @@ class PersonFollowerNode(Node):
         msg.angular.z = 0.0
         self.pub.publish(msg)
 
+    def move_forward_square(self, msg):
+        msg.linear.x = 0.2
+        msg.angular.z = 0.0
+        self.pub.publish(msg)
+        sleep(5)
+        msg.linear.x = 0.0
+        msg.angular.z = 0.0
+        self.pub.publish(msg)
+
+    def turn_left_square(self, msg):
+        msg.linear.x = 0.0
+        msg.angular.z = 0.5
+        self.pub.publish(msg)
+        sleep(3.3)
+        msg.linear.x = 0.0
+        msg.angular.z = 0.0
+        self.pub.publish(msg)
+
     def run_loop(self):
         msg = Twist()
         print("loop")
@@ -88,38 +107,51 @@ class PersonFollowerNode(Node):
             print("Empty!")
             return
 
-        closest_point = min(self.ranges)
-        print(f"ranges: {self.ranges}")
-        print(f"closest point: {closest_point}")
+        is_no_detection = all(math.isinf(x) for x in self.ranges)
 
-        closest_point_idx = self.ranges.index(closest_point)
+        match self.state:
+            case "drive_square":
+                if is_no_detection:
+                    self.move_forward_square(msg)
+                    self.turn_left_square(msg)
+                    return
+                else:
+                    self.state = "follow_person"
+                    return
+            case "follow_person":
+                if not is_no_detection:
+                    closest_point = min(self.ranges)
 
-        # Index corresponds to point's angle relative to NEATO
-        angular_error = closest_point_idx - 45
-        print(f"angular error: {angular_error}")
+                    closest_point_idx = self.ranges.index(closest_point)
 
-        # Adjust angular position (rotate)
-        if not (-5 < angular_error < 5):
-            if angular_error > 0:
-                self.turn_right(msg)
-            else:
-                self.turn_left(msg)
-            return
+                    # Index corresponds to point's angle relative to NEATO
+                    angular_error = closest_point_idx - 45
 
-        # Adjust linear position (translate)
-        if not abs(self.follow_distance - closest_point) < 0.2:
-            if self.follow_distance - closest_point < 0:
-                self.move_forward(msg)
-            else:
-                self.move_backward(msg)
-            return
+                    # Adjust angular position (rotate)
+                    if not (-5 < angular_error < 5):
+                        if angular_error > 0:
+                            self.turn_right(msg)
+                        else:
+                            self.turn_left(msg)
+                        return
+
+                    # Adjust linear position (translate)
+                    if not abs(self.follow_distance - closest_point) < 0.1:
+                        if self.follow_distance - closest_point < 0:
+                            self.move_forward(msg)
+                        else:
+                            self.move_backward(msg)
+                        return
+                else:
+                    self.state = "drive_square"
+                    return
 
         sleep(0.5)
 
 
 def main():
     rclpy.init()
-    node = PersonFollowerNode()
+    node = FiniteStateControllerNode()
     rclpy.spin(node)  # infinite loop
     rclpy.shutdown()  # when is spin complete
 
