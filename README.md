@@ -72,6 +72,10 @@ match key:
 self.pub.publish(msg)
 ```
 
+## Challenges
+
+Not many challenges arise when using the incremental development strategy! This sub project was also very simple, most of the challenges came from getting the ROS environment to run properly. Using aliases to run a chain of commands also sped up this interative process by a large factor.
+
 # Driving in a Square
 
 ## Problem
@@ -117,6 +121,10 @@ def run_loop(self):
     self.turn_left(msg)
 ```
 
+## Challenges
+
+Finding the correct timings of to get a 90 degree turn was tedious and could be remedied by utilizing the NEATO's onboard odometry. Other than that, this sub project remained rather simple. A great extension would be to add threading so that other processes on the robot aren't blocked by the sleep statements.
+
 # Person Following
 
 ## Problem
@@ -139,14 +147,17 @@ We found that this problem can be divided into two parts: gathering the distance
     <img src="./media/p4_2.svg" alt="Alt text" width="400">
 </div>
 
-Before tackling these two sub problems, we had to decide on what an object is to our NEATO. We came up with the simplest solution: the NEATO will treat the point from the laser scan that is closest to it as its target. The laser scan data comes in the form of a list with 360 elements (1 distance scan for each degree around the NEATO). We sliced the list to only get the points that were in front of the NEATO and discaded points that were further than we wanted the NEATO to track.
+Before tackling these two sub problems, we had to decide on what an object is to our NEATO. We came up with the simplest solution: the NEATO will treat the point from the laser scan that is closest to it as its target. The laser scan data comes in the form of a list with 360 elements (1 distance scan for each degree around the NEATO). We sliced the list to only get the points that were in front of the NEATO and discaded points that were further than we wanted the NEATO to track. First we took 0 - 45 degrees which were indicies 0 - 45 of the scan list. Then we took -45 - 0 degrees which were indicies 314 - 359. Reversing both lists and concatenating them together yields the laser ranged distances at angles -45 - 45 degrees.
 
 ```python
 ...
 self.create_subscription(LaserScan, "scan", self.process_scan, 10)
+self.max_scan_distance = 5
 ...
 def process_scan(self, laser_data):
-        ranges = list(laser_data.ranges)
+        ranges = laser_data.ranges
+        ranges_list = list(ranges)
+
         ranges_left = ranges_list[0:45]
         ranges_right = ranges_list[314:359]
 
@@ -157,8 +168,10 @@ def process_scan(self, laser_data):
             ranges_left_reversed.append(ranges_left[i])
             ranges_right_reversed.append(ranges_right[i])
 
-        ranges_forward = ranges_left_reversed + ranges_right_reversed
-        self.ranges = [range if self.max_tracking_distance <= 5 else math.inf for range in ranges_forward]
+        ranges_front = ranges_left_reversed + ranges_right_reversed
+        self.ranges = [
+            math.inf if x > self.max_scan_distance else x for x in ranges_front
+        ]
 ```
 
 Now that we have the data, we can start to use it to tell the NEATO how to orient itself. We do this processing in our main loop:
@@ -200,7 +213,7 @@ Notice that we reused the move functions from previous projects, another benefit
 
 ## Challenges
 
-The greatest hurdle for this project was working with the laser scan data. We weren't aware that the data is given in an array format which took much of our development time away. Using print statements to get the type of the data sped up the debugging process once we realized what might be wrong. In the future, we'll resort first to printing out the types of variables when encountering issues with data from sensors.
+The greatest hurdle for this project was working with the laser scan data. We weren't aware that the data is given in an array format which took much of our development time away. Using print statements to get the type of the data sped up the debugging process once we realized what might be wrong. We also found issues with using the reverse method on our laser scan list, so we resorted to manually reversing the data using a for loop (not clean!). In the future, we'll resort first to printing out the types of variables when encountering issues with data from sensors.
 
 # Finite-State Control
 
@@ -235,6 +248,7 @@ def run_loop(self):
     match self.state:
             case "drive_square":
                 if is_no_detection:
+                    # Logic for square driving
                     self.move_forward_square(msg)
                     self.turn_left_square(msg)
                     return
@@ -243,29 +257,17 @@ def run_loop(self):
                     return
             case "follow_person":
                 if not is_no_detection:
-                    closest_point = min(self.ranges)
-
-                    closest_point_idx = self.ranges.index(closest_point)
-
-                    # Index corresponds to point's angle relative to NEATO
-                    angular_error = closest_point_idx - 45
-
-                    # Adjust angular position (rotate)
-                    if not (-5 < angular_error < 5):
-                        if angular_error > 0:
-                            self.turn_right(msg)
-                        else:
-                            self.turn_left(msg)
-                        return
-
-                    # Adjust linear position (translate)
-                    if not abs(self.follow_distance - closest_point) < 0.2:
-                        if self.follow_distance - closest_point < 0:
-                            self.move_forward(msg)
-                        else:
-                            self.move_backward(msg)
-                        return
+                    # Logic for person following
+                    ...
                 else:
                     self.state = "drive_square"
                     return
 ```
+
+Like the previous sub projects, we were able to reuse movement and laser process scan functionality because we placed these behaviors into functions that seemlessly fit into our finite state controller node class.
+
+Walking through the state transitions is simple for this example. The NEATO starts in square following. If the lidar scan returns all infinite values we know that the NEATO does not see anything in its "viewbox" from the person follower project. If the NEATO does not detect a target, it will remain in the drive_square state, if it does detect a target, the is_no_detection flag will go true and at the check in the drive_square state will change the state to the follow_person state. The NEATO will remain in the follow_person state as long as it has a target. If it doesn't detect a target, it will go back into the drive_square state.
+
+## Challenges
+
+There are many ways to handle the state change between the drive_square and follow_person state. A better way (in this simple case) is to get rid of the state attribute and soley determine the state based on the is_no_detection variable with a simple if statement. This structure would work well for a simple case, but for a more complicated state it's better to name a state variable to make the code more readable. Deciding to keep the code more "efficient" vs more readable was a challenge during this sub-project.
