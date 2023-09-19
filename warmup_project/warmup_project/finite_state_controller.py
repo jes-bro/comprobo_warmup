@@ -19,7 +19,6 @@ class FiniteStateControllerNode(Node):
     The node subscribes to LaserScan messages to get data from a LiDAR sensor and publishes Twist messages
     to control the robot's movement.
     """
-
     def __init__(self):
         super().__init__("finite_state_controller_node")
         # Args: interval between invocations of the timer (period), (callback)
