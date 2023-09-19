@@ -1,9 +1,5 @@
 import rclpy
 from rclpy.node import Node  # Import super/base class required to create ROS Node
-
-# Topics are tight so they expect a type of data to go over a topic
-# Topic is channel
-# Will stuff break if you use different msg types
 from geometry_msgs.msg import Twist
 from visualization_msgs.msg import Marker
 import tty
