@@ -132,7 +132,11 @@ Finding the correct timings of to get a 90 degree turn was tedious and could be 
 
 # Wall Following
 
-The goal of this task was to perform wall-following using laser-scan data. 
+## Problem
+
+The goal of this task was to perform wall-following using laser-scan data. What that means is, the robot has to remain parallel to a wall as it moves forward, and remain as close as possible to a fixed distance away from the wall.
+
+## Strategy / Structure
 
 Our wall follower algorithm stays parallel to the wall by ensuring that its distance measurement at a 45 degree angle and at a 135 degree angle remain close within some threshold $\epsilon$
 $$|d_1 - d_2| < \epsilon$$
@@ -307,6 +311,8 @@ Within the class, attributes were initialized to store the minimum, maximum, and
 
 Additionally, to simplify data processing, the laser range data was converted into a standard list format, avoiding the complications inherent to array syntax (the default type of the laser range data is array.array, which is slightly more complicated to index).
 
+## Challenges
+
 The heat map generation is commented out from the node initialization because it stops the node from running until the plot is closed. We could have addressed this, but due to time constraints, we decided not to. We also encountered an issue where we forgot to convert the LiDAR scan data from degrees to radians initially- which rendered the plot incorrect. Fixing that issue and increasing the resolution of the plot made it readable and accurate. Test data was used to verify the accuracy of the plot- ie. lines with known $\rho$ and $\theta$ values.
 
 # Person Following
@@ -406,6 +412,50 @@ The greatest hurdle for this project was working with the laser scan data. We we
 
 ## Visualization
 ![5](./media/5.gif)
+
+# Obstacle Avoider
+
+## Problem
+The goal for the obstacle avoider is to do just that- avoid obstales. We noticed early on that the logic for following a person, which involves turning toward something that's close to you, can be reversed engineered so you move away from the thing that's close to you. That was our general approach to solving this problem. Obstacle Avoidance is extremely useful in any environment where there are static or dynamic obstacles in place- its important that robots know how to navigate around these things and achieve their objectives if they are going to do anything meaningul in the real world.
+
+## Strategy / Structure
+
+The logic for our obstacle avoider node is very similar to that of the person follower:
+
+For simplicity, the robot only considers data from the front. This is achieved by combining reversed ranges from the left and right sides of the robot:
+
+ranges_front=reverse(ranges_left)+reverse(ranges_right)
+
+It then determines the closest obstacle in that range:
+$$O_{\text{closest}} = \text{min}(r_{1},r_{2},...,r_{n})$$
+where 
+* $O_{\text{closest}}$ is the closest obstacle
+* $r_{1},r_{2},...,r_{n}$ are the distances corresponding to the angles the robot considers
+
+Then, we have to decide which way to turn (if at all) based on our proximity to the obstacle. To do so, we designate a safe threshold that we want the robot to maintain. If the robot gets closer than the threshold, it should take the correct action to avoid a collision. 
+
+Knowing that $C$ is the closest distance, we compare C to the distance threshold, $D$, to determine whether we are too close to the obstacle. We check if
+$$|D−C∣<\epsilon$$
+* where $\epsilon$ is our threshold value. In this node, $\epsilon=1$ (hard-coded)
+
+Because of the way we index the LiDAR scan, the midpoint of our range is 45 degrees, and to center ourselves at zero, we subtract by 45 degrees:
+$$\text{angular error}=I_O​−45$$
+where
+* $I_C$ is the index corresponding to the closest obstacle
+
+
+Then, once we're centered at zero, an angular error that is negative indicates that the closest distance is to the left of us, so we want to turn right to avoid the obstacle. If the angular error is positive, that means that the angle corresponding to the closest distance (where the obstacle is) is to the right of us. So, we can express our logic in the following way:
+$$\begin{cases} 
+\text{turn\_left()} & \text{if } \text{angular\_error} > 0 \\
+\text{turn\_right()} & \text{if } \text{angular\_error} < 0 
+\end{cases}$$
+
+Then turn_left or turn_right is called to update the angular velocity components of the Twist message that gets published.
+
+## Challenges
+
+In all honesty not many obstacles were encountered during this section because the logic is so similar to that of the person following implementation. We did try to implement a correction at the end so that the robot would correct its angle and continue going where it was before, but we realized that the way we were doing that was very specific to the particular environment setup and would not generalize well to other ones. So, we decided to not implement the approach for correction. Our initial approach for correction involved using flags to denote whether a robot has rotated and which direction it has rotated about, so that we can then tell it to rotate in the opposite direction as it moves forward. This presented some minor implementation challenges that we decided were not worth spending a lot more time on.
+
 
 # Finite-State Control
 
