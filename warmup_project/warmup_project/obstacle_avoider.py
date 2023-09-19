@@ -119,23 +119,22 @@ class ObstacleAvoiderNode(Node):
 
     def run_loop(self):
         msg = Twist()
-        print("loop")
+
         # Check to see if LIDAR data empty
         if len(self.ranges) == 0:
-            print("Empty!")
             return
 
         ranges_copy = self.ranges
+
+        # Get closest point to NEATO
         closest_point = min(ranges_copy)
-        print(f"ranges: {ranges_copy}")
-        print(f"closest point: {closest_point}")
 
         closest_point_idx = ranges_copy.index(closest_point)
 
         # Index corresponds to point's angle relative to NEATO
         angular_error = closest_point_idx - 45
-        print(f"angular error: {angular_error}")
 
+        #  If closest point is within threshold, turn
         if abs(self.distance_threshold - closest_point) < 1:
             if angular_error > 0:
                 self.turn_left(msg)

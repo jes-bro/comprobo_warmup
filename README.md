@@ -45,7 +45,7 @@ while key != '\x03':
         print("W pressed!")
 ```
 
-Once we saw that we can chance the control flow of the program, we replaced the print statement with a control message to send to the NEATO.
+Once we saw that we can chance the control flow of the program, we replaced the print statement with a control message to send to the NEATO. The function sets the properties of the Twist msg which gets published to the NEATO at the end of the loop.
 
 ```python
 if (key == "w"):
@@ -120,6 +120,8 @@ def turn_left(self, msg):
     msg.angular.z = 0.0
     self.pub.publish(msg)
 ```
+
+Not here we placed the publishing line at the end of each function instead of at the end of the main run loop. This keeps the code less coupled.
 
 There were some non-obvious questions to answer however: How do we turn exactly 90° and how do we drive exactly distance d. Since we wanted to simple timing instead of the NEATO's odometry, the simple answer is we couldn't get the NEATO to turn and move exactly how we wanted. By utilizing gazebo and through trial and error, we tried various timing values for the move_forward and turn_left function until we got movements that we were happy with.
 

@@ -82,42 +82,87 @@ class FiniteStateControllerNode(Node):
         self.pub.publish(msg)
 
     def move_backward(self, msg):
+        """
+        Moves the robot backward for a short duration, then stops it.
+
+        Args:
+            msg (MessageType): A ROS message containing the linear and angular velocities.
+        """
+        # Set linear velocity to move backward.
         msg.linear.x = -0.05
+        # Ensure there's no angular velocity (i.e., robot moves in a straight line).
         msg.angular.z = 0.0
+        # Publish the velocity message.
         self.pub.publish(msg)
+        # Sleep for a short duration while the robot moves.
         sleep(0.1)
+        # Stop the robot after moving.
         msg.linear.x = 0.0
         msg.angular.z = 0.0
         self.pub.publish(msg)
 
     def turn_left(self, msg):
+        """
+        Turns the robot to the left for a short duration, then stops it.
+
+        Args:
+            msg (MessageType): A ROS message containing the angular velocity.
+        """
+        # Set angular velocity to turn left.
         msg.angular.z = 0.1
         self.pub.publish(msg)
         sleep(0.1)
+        # Stop the turn after a short duration.
         msg.angular.z = 0.0
         self.pub.publish(msg)
 
     def turn_right(self, msg):
+        """
+        Turns the robot to the right for a short duration, then stops it.
+
+        Args:
+            msg (MessageType): A ROS message containing the angular velocity.
+        """
+        # Set angular velocity to turn right.
         msg.angular.z = -0.1
         self.pub.publish(msg)
         sleep(0.1)
+        # Stop the turn after a short duration.
         msg.angular.z = 0.0
         self.pub.publish(msg)
 
     def move_forward_square(self, msg):
+        """
+        Moves the robot forward for a longer duration, then stops it.
+
+        Args:
+            msg (MessageType): A ROS message containing the linear velocity.
+        """
+        # Set linear velocity to move forward.
         msg.linear.x = 0.2
         msg.angular.z = 0.0
         self.pub.publish(msg)
+        # Sleep for a longer duration while the robot moves.
         sleep(5)
+        # Stop the robot after moving.
         msg.linear.x = 0.0
         msg.angular.z = 0.0
         self.pub.publish(msg)
 
     def turn_left_square(self, msg):
+        """
+        Turns the robot to the left for a longer duration, then stops it.
+
+        Args:
+            msg (MessageType): A ROS message containing the angular velocity.
+        """
+        # Set angular velocity to turn left for a longer duration.
         msg.linear.x = 0.0
         msg.angular.z = 0.5
         self.pub.publish(msg)
+        # Sleep for a longer duration while the robot turns.
         sleep(3.3)
+        # Stop the turn after a certain duration.
         msg.linear.x = 0.0
         msg.angular.z = 0.0
         self.pub.publish(msg)
@@ -130,19 +175,24 @@ class FiniteStateControllerNode(Node):
             print("Empty!")
             return
 
+        # Parameter that determines the NEATO's state
         is_no_detection = all(math.isinf(x) for x in self.ranges)
 
+        # Switch statement that acts as control flow between states
         match self.state:
             case "drive_square":
                 if is_no_detection:
+                    # Drive square behavior
                     self.move_forward_square(msg)
                     self.turn_left_square(msg)
                     return
                 else:
+                    # Chance state to follow_person
                     self.state = "follow_person"
                     return
             case "follow_person":
                 if not is_no_detection:
+                    # Follow person behavior
                     closest_point = min(self.ranges)
 
                     closest_point_idx = self.ranges.index(closest_point)
@@ -166,6 +216,7 @@ class FiniteStateControllerNode(Node):
                             self.move_backward(msg)
                         return
                 else:
+                    # Chance state to drive_square
                     self.state = "drive_square"
                     return
 
