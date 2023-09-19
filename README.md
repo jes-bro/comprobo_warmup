@@ -72,6 +72,8 @@ match key:
 self.pub.publish(msg)
 ```
 
+## Visualization
+![1](./media/1.gif)
 ## Challenges
 
 Not many challenges arise when using the incremental development strategy! This sub project was also very simple, most of the challenges came from getting the ROS environment to run properly. Using aliases to run a chain of commands also sped up this interative process by a large factor.
@@ -120,6 +122,9 @@ def run_loop(self):
     self.move_forward(msg)
     self.turn_left(msg)
 ```
+
+## Visualization
+![2](./media/2.gif)
 
 ## Challenges
 
@@ -215,6 +220,9 @@ Notice that we reused the move functions from previous projects, another benefit
 
 The greatest hurdle for this project was working with the laser scan data. We weren't aware that the data is given in an array format which took much of our development time away. Using print statements to get the type of the data sped up the debugging process once we realized what might be wrong. We also found issues with using the reverse method on our laser scan list, so we resorted to manually reversing the data using a for loop (not clean!). In the future, we'll resort first to printing out the types of variables when encountering issues with data from sensors.
 
+## Visualization
+![5](./media/5.gif)
+
 # Finite-State Control
 
 ## Problem
@@ -271,3 +279,6 @@ Walking through the state transitions is simple for this example. The NEATO star
 ## Challenges
 
 There are many ways to handle the state change between the drive_square and follow_person state. A better way (in this simple case) is to get rid of the state attribute and soley determine the state based on the is_no_detection variable with a simple if statement. This structure would work well for a simple case, but for a more complicated state it's better to name a state variable to make the code more readable. Deciding to keep the code more "efficient" vs more readable was a challenge during this sub-project.
+
+## Visualization
+![6](./media/6.gif)
