@@ -277,12 +277,16 @@ def generate_heat_map(self, accumulator):
     plt.show()
 ~~~
 &nbsp;
+$~$
+$~$
 
 <div style="text-align:center">
     <img src="./media/p5_1.png" alt="Alt text" width="2000">
 </div> 
 Screenshot of wall detection in RViz with Marker topic displayed during wall follower run
 &nbsp; 
+$~$
+$~$
 
 Within the class, attributes were initialized to store the minimum, maximum, and step values of $\rho$, making these parameters universally accessible across functions. The minimum, maximum, and step values were used to create discretized buckets in the Hough space. We also establish a linspace of thetas, ranging from 0 to 180 degrees. For a line in Cartesian space, there are two equivalent representations in Hough space that are 180 degrees apart. Therefore, using a full 360 degrees would introduce redundancy. In the script, all angles were kept in radians for simplicity’s sake. 
 
