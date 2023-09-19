@@ -441,7 +441,7 @@ $$|D−C∣<\epsilon$$
 Because of the way we index the LiDAR scan, the midpoint of our range is 45 degrees, and to center ourselves at zero, we subtract by 45 degrees:
 $$\text{angular error}=I_O​−45$$
 where
-* $I_C$ is the index corresponding to the closest obstacle
+* $I_O$ is the index corresponding to the closest obstacle
 
 
 Then, once we're centered at zero, an angular error that is negative indicates that the closest distance is to the left of us, so we want to turn right to avoid the obstacle. If the angular error is positive, that means that the angle corresponding to the closest distance (where the obstacle is) is to the right of us. So, we can express our logic in the following way:
