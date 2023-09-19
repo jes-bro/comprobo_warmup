@@ -338,8 +338,6 @@ $$\text{ranges front}=\text{reverse}(\text{ranges left})+\text{reverse}(\text{ra
 
 First we took 0 - 45 degrees which were indicies 0 - 45 of the scan list. Then we took -45 - 0 degrees which were indicies 314 - 359. Reversing both lists and concatenating them together yields the laser ranged distances at angles -45 - 45 degrees.
 
-$$\text{angular error}=\text{closest point index} − 45$$
-
 ```python
 ...
 self.create_subscription(LaserScan, "scan", self.process_scan, 10)
