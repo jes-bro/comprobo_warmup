@@ -130,6 +130,157 @@ def run_loop(self):
 
 Finding the correct timings of to get a 90 degree turn was tedious and could be remedied by utilizing the NEATO's onboard odometry. Other than that, this sub project remained rather simple. A great extension would be to add threading so that other processes on the robot aren't blocked by the sleep statements.
 
+# Wall Following
+
+The goal of this task was to perform wall-following using laser-scan data. As an extension, we decided to perform wall detection using a Hough Transform with $\rho$-$\theta$ parameterization, where 
+* $\rho$ is the perpendicular distance from the origin and 
+* $\theta$ is the angle from the x axis to $\rho$
+ 
+We verify the algorithm's implementation and visualize its voting procedure in the form of a heat map. The heat map is created using Matplotlib and Seaborn.
+
+We start by converting the polar coordinates from the LiDAR scan data to Cartesian coordinates using the standard conversion:
+
+$$x = r\cos(\theta)$$
+
+$$y = r\sin(\theta)$$
+
+where $r$ is the distance corresponding to each angle represented the LiDAR scan.
+
+We convert to Cartesian coordinates so that the $\rho$ value can be calculated using 
+$$\rho = x\cos(
+\theta) + y\sin(\theta)$$
+
+Once the $\rho$ value is calculated for each $\theta$ and coordinate pair, we determine which bin needs to be incremented. We do this by normalizing with the minimum  $\rho$ value, $\rho_{min}$, and dividing by the resolution of the $\rho$ values ($\rho_{r}$)
+$$\text{bin} = \frac{\rho - \rho_{min}}{\rho_{r}}$$
+
+Here are the specific implementation details:
+ ~~~python
+def generate_hough_space(self, points):
+    
+    # Create an accumulator matrix initialized to zeros. The dimensions are determined by 
+    # the number of r_values (rho values) and thetas (angle values).
+    accumulator = np.zeros((len(self.r_values), len(self.thetas)))
+    
+    # Iterate through each Cartesian point (x,y) from the provided list.
+    for point in points:
+        
+        # For each point, calculate its representation in Hough space by iterating through 
+        # all possible theta values.
+        for index, theta in enumerate(self.thetas):
+            
+            # Calculate the r (rho) value for the current point and theta combination.
+            # This represents the perpendicular distance from the origin to the line defined by 
+            # the point and angle theta.
+            r = point[0] * cos(theta) + point[1] * sin(theta)
+            
+            # Convert the calculated r value to its corresponding bucket/index in the accumulator matrix.
+            # This is done by normalizing with r_min (minimum r value) and dividing by r_step 
+            # (resolution of r values).
+            bin = int((r - self.r_min) / self.r_step)
+            
+            # Check if the calculated bin is within valid index bounds of the accumulator matrix.
+            # If valid, increment the vote count for the corresponding (r, theta) combination.
+            if 0 <= bin < len(self.r_values):
+                accumulator[bin][index] += 1
+                
+    # Return the filled accumulator matrix representing the Hough space.
+    return accumulator
+
+~~~
+Then, we use a Seaborn heatmap to illustrate the “hottest” bins with the highest value/number of votes. The $\rho-\theta$ pairs in the hottest 30% of bins are converted back into lines represented by markers. Those markers are then published to their own topic so the detected wall can be visualized in RViz. We calculate our threshold in this way so that it is dynamic and not reliant on hard-coded values that vary depending on the situation. For the sake of time, the Hough Transform does not influence our wall following- it simply serves to detect the walls and in the future could be used to follow walls.
+
+Here are the details of the heat map and wall visualizations: 
+~~~python
+def plot_lines(self, accumulator):
+    # Get the maximum value from the accumulator matrix
+    max_value = np.max(accumulator)
+
+    # Set a threshold to be 70% of the highest accumulator value.
+    # Lines with votes above this threshold are considered strong enough to plot.
+    threshold = 0.7 * max_value
+
+    # Identify the (rho, theta) pairs that have votes greater than the threshold
+    hot_spots = np.where(accumulator >= threshold)
+
+    # For each of the identified (rho, theta) pairs
+    for y, x in zip(*hot_spots):
+        # Extract the corresponding rho and theta values
+        rho = self.r_values[y]
+        theta = self.thetas[x]
+        
+        # Convert the polar coordinates (rho, theta) into two end-points in Cartesian coordinates 
+        # that define the line.
+        # The line is extended by 500 units in both directions from the original point.
+        x1 = rho * np.cos(theta) - 500 * np.sin(theta)
+        y1 = rho * np.sin(theta) + 500 * np.cos(theta)
+        x2 = rho * np.cos(theta) + 500 * np.sin(theta)
+        y2 = rho * np.sin(theta) - 500 * np.cos(theta)
+
+        # Create start and end points for the line in 3D space (though Z coordinate is set to zero)
+        start_point = Point()
+        start_point.x = x1
+        start_point.y = y1
+        start_point.z = 0.0
+        end_point = Point()
+        end_point.x = x2
+        end_point.y = y2
+        end_point.z = 0.0
+
+        # Use a helper function to publish the line for visualization purposes.
+        self.publish_line(start_point, end_point)
+
+def publish_line(self, start_point, end_point):
+    # Initialize a Marker object for ROS visualization.
+    marker = Marker()
+    
+    # Define basic properties of the marker
+    marker.header.frame_id = "/odom" 
+    marker.type = Marker.LINE_LIST
+    marker.action = Marker.ADD
+    marker.pose.orientation.w = 1.0
+    marker.scale.x = 0.02  # Sets the width of the line
+    marker.color.r = 1.0
+    marker.color.a = 1.0  # Alpha value (opacity)
+    
+    # Append start and end points to the marker's points attribute
+    marker.points.append(start_point)
+    marker.points.append(end_point)
+
+    # Publish the marker for visualization
+    self.pub2.publish(marker)
+    
+def generate_heat_map(self, accumulator):
+    # Create a new figure and axis for the heatmap
+    fig, ax = plt.subplots(figsize=(10, 10))
+    
+    # Visualize the accumulator as a heatmap using seaborn's heatmap function
+    sns.heatmap(accumulator, cmap='viridis', ax=ax)
+
+    # Set labels and title for the heatmap
+    ax.set_xlabel('Theta (radians)')
+    ax.set_ylabel('$\\rho$ (meters)')
+    ax.set_title("Hough Space: $\\rho - \\theta$ Parameterization")
+    
+    # Adjust y-axis limits and tick labels for better visualization
+    r_min, r_max, r_step = -5, 5, 0.025
+    ax.set_ylim(len(accumulator) - 1, 0)  # Reverses the y-axis limits for top-down plot
+    r_values = np.arange(r_min, r_max + r_step, r_step)
+    y_ticks = np.arange(0, len(r_values), 10)
+    ax.set_yticks(y_ticks)
+    ax.set_yticklabels([round(r_values[i], 2) for i in y_ticks])
+    
+    # Display the heatmap
+    plt.show()
+~~~
+
+Insert image here: Caption: Screenshot of wall detection in RViz with Marker topic displayed during wall follower run
+
+Within the class, attributes were initialized to store the minimum, maximum, and step values of $\rho$, making these parameters universally accessible across functions. The minimum, maximum, and step values were used to create discretized buckets in the Hough space. We also establish a linspace of thetas, ranging from 0 to 180 degrees. For a line in Cartesian space, there are two equivalent representations in Hough space that are 180 degrees apart. Therefore, using a full 360 degrees would introduce redundancy. In the script, all angles were kept in radians for simplicity’s sake. 
+
+Additionally, to simplify data processing, the laser range data was converted into a standard list format, avoiding the complications inherent to array syntax (the default type of the laser range data is array.array, which is slightly more complicated to index).
+
+The heat map generation is commented out from the node initialization because it stops the node from running until the plot is closed. We could have addressed this, but due to time constraints, we decided not to. We also encountered an issue where we forgot to convert the LiDAR scan data from degrees to radians initially- which rendered the plot incorrect. Fixing that issue and increasing the resolution of the plot made it readable and accurate. Test data was used to verify the accuracy of the plot- ie. lines with known $\rho$ and $\theta$ values.
+
 # Person Following
 
 ## Problem
