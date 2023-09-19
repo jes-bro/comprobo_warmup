@@ -1,6 +1,6 @@
 # Introduction
 
-As part of a warmup to ROS2, we took on a series of mini-projects that allowed us to become familiar with ROS2's structure. We also employed various algorithms to achieve the tasks, learning a lot along the way.
+As part of a warmup to ROS2, we took on a series of mini-projects that allowed us to become familiar with its structure. We also employed various algorithms to achieve the tasks, learning a lot along the way.
 
 # Table of Contents
 The mini-projects were as follows:
