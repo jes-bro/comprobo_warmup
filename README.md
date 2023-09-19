@@ -144,7 +144,7 @@ $$x = r\cos(\theta)$$
 
 $$y = r\sin(\theta)$$
 
-where $r$ is the distance corresponding to each angle represented the LiDAR scan.
+where $r$ is the distance corresponding to each angle represented in the LiDAR scan.
 
 We convert to Cartesian coordinates so that the $\rho$ value can be calculated using 
 $$\rho = x\cos(
