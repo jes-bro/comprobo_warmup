@@ -16,7 +16,6 @@ class PersonFollowerNode(Node):
     ROS Node to follow a person based on LaserScan data. The node uses a simple algorithm to determine the direction
     and distance to the closest point in a subset of the laser scan range and moves towards that point at a specified follow distance.
     """
-
     def __init__(self):
         super().__init__("person_follower_node")
         self.create_timer(
