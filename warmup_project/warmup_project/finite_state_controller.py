@@ -16,6 +16,14 @@ import math
 
 
 class FiniteStateControllerNode(Node):
+    """
+    A ROS node that implements a finite state controller for a robot. The robot can either follow a person
+    based on LiDAR sensor data or drive in a square path if no person is detected.
+
+    The node subscribes to LaserScan messages to get data from a LiDAR sensor and publishes Twist messages
+    to control the robot's movement.
+    """
+
     def __init__(self):
         super().__init__("finite_state_controller_node")
         # Args: interval between invocations of the timer (period), (callback)
@@ -31,6 +39,15 @@ class FiniteStateControllerNode(Node):
         self.state = "drive_square"
 
     def process_scan(self, laser_data):
+        """
+        Callback function to process LaserScan data.
+
+        Extracts and stores range data from the front 90 degrees field of view of the robot, filtering out
+        measurements beyond max_scan_distance.
+
+        Args:
+            laser_data (LaserScan): The incoming laser data message.
+        """
         ranges = laser_data.ranges
         ranges_list = list(ranges)
 
@@ -50,6 +67,12 @@ class FiniteStateControllerNode(Node):
         ]
 
     def move_forward(self, msg):
+        """
+        Moves the robot forward by publishing a Twist message with a positive linear velocity.
+
+        Args:
+            msg (Twist): The Twist message object to publish the velocity commands.
+        """
         msg.linear.x = 0.05
         msg.angular.z = 0.0
         self.pub.publish(msg)

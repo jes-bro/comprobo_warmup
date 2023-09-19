@@ -18,7 +18,7 @@ Note: don’t leave the writeup to the very end! You will have a much better tim
 The NEATO by itself can't do much without a controller. Yes, it can gather data about its surroundings but without a node telling it what to do, the NEATO will remain stationary. For this sub-project, the task is to create a node that allows a user to control the NEATO using keybinds. A successful outcome to this task looks like: The user can drive the NEATO forward by pressing w, backward by pressing s, turn right by pressing d, and turn left by pressing a.
 
 <div style="text-align:center">
-    <img src="./media/p1_1.svg" alt="Alt text" width="400">
+    <img src="./media/1_1.svg" alt="Alt text" width="400">
 </div>
 
 ## Strategy / Structure
@@ -83,7 +83,7 @@ Not many challenges arise when using the incremental development strategy! This 
 Now that we know that we know that the NEATO is controllable, we would like to hand off control to a computer instead of manually pressing the w, a, s, and d keys. In this problem, we are tasked to make the NEATO drive in a square autonomously. A successful outcome to this task looks like: The NEATO drives forward some determined distance, rotates left 90 degrees, drives forward some determined distance, and so on.
 
 <div style="text-align:center">
-    <img src="./media/p2_1.svg" alt="Alt text" width="400">
+    <img src="./media/2_1.svg" alt="Alt text" width="400">
 </div>
 
 ## Strategy / Structure
@@ -138,13 +138,13 @@ We found that this problem can be divided into two parts: gathering the distance
 ### Viewbox
 
 <div style="text-align:center">
-    <img src="./media/p4_1.svg" alt="Alt text" width="400">
+    <img src="./media/4_1.svg" alt="Alt text" width="400">
 </div>
 
 ### Orientation
 
 <div style="text-align:center">
-    <img src="./media/p4_2.svg" alt="Alt text" width="400">
+    <img src="./media/4_2.svg" alt="Alt text" width="400">
 </div>
 
 Before tackling these two sub problems, we had to decide on what an object is to our NEATO. We came up with the simplest solution: the NEATO will treat the point from the laser scan that is closest to it as its target. The laser scan data comes in the form of a list with 360 elements (1 distance scan for each degree around the NEATO). We sliced the list to only get the points that were in front of the NEATO and discaded points that were further than we wanted the NEATO to track. First we took 0 - 45 degrees which were indicies 0 - 45 of the scan list. Then we took -45 - 0 degrees which were indicies 314 - 359. Reversing both lists and concatenating them together yields the laser ranged distances at angles -45 - 45 degrees.
@@ -222,7 +222,7 @@ The greatest hurdle for this project was working with the laser scan data. We we
 This task requires the NEATO to perform multiple behaviors based on the current state of a system. We chose to implement a combination of square driving and person following. A successful outcome to this task looks like: The NEATO begins by driving in a square. If it doesn't detect any objects in front of it with its laser scanner it will continue driving in a square. Once an object has been detected the state will change into person following mode where it will orient itself a predetermined distance from the detected object.
 
 <div style="text-align:center">
-    <img src="./media/p6_1.svg" alt="Alt text" width="400">
+    <img src="./media/6_1.svg" alt="Alt text" width="400">
 </div>
 
 ## Strategy / Structure
