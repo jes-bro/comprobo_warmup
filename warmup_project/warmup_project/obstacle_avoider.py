@@ -24,7 +24,6 @@ class ObstacleAvoiderNode(Node):
         distance_threshold (float): The distance threshold for considering an object as an obstacle.
         turning_right (bool): Flag to indicate the current turning direction of the robot.
     """
-
     def __init__(self):
         super().__init__("obstacle_avoider_node")
         # Args: interval between invocations of the timer (period), (callback)
