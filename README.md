@@ -150,7 +150,7 @@ We convert to Cartesian coordinates so that the $\rho$ value can be calculated u
 $$\rho = x\cos(
 \theta) + y\sin(\theta)$$
 
-Once the $\rho$ value is calculated for each $\theta$ and coordinate pair, we determine which bin needs to be incremented. We do this by normalizing with the minimum  $\rho$ value, $\rho_{min}$, and dividing by the resolution of the $\rho$ values ($\rho_{r}$)
+Once the $\rho$ value is calculated for each $\theta$ and coordinate pair, we determine which bin (in the discretized Hough space) needs to be incremented. We do this by normalizing with the minimum  $\rho$ value, $\rho_{min}$, and dividing by the resolution of the $\rho$ values ($\rho_{r}$)
 $$\text{bin} = \frac{\rho - \rho_{min}}{\rho_{r}}$$
 
 Here are the specific implementation details:
