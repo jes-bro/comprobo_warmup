@@ -284,7 +284,7 @@ def generate_heat_map(self, accumulator):
     <img src="./media/p5_1.png" alt="Alt text" width="2000">
 </div> 
 <div style="text-align:center">
-Screenshot of wall detection in RViz with Marker topic displayed during wall follower run.
+<p style="text-align: center;">Screenshot of wall detection in RViz with Marker topic displayed during wall follower run.</p>
 </div> 
 &nbsp; 
 <br/><br/>
