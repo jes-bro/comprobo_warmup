@@ -72,6 +72,9 @@ match key:
 self.pub.publish(msg)
 ```
 
+## Visualization
+![1](./media/1.gif)
+
 # Driving in a Square
 
 ## Problem
@@ -116,6 +119,10 @@ def run_loop(self):
     self.move_forward(msg)
     self.turn_left(msg)
 ```
+
+## Visualization
+![2](./media/2.gif)
+
 
 # Person Following
 
@@ -202,6 +209,9 @@ Notice that we reused the move functions from previous projects, another benefit
 
 The greatest hurdle for this project was working with the laser scan data. We weren't aware that the data is given in an array format which took much of our development time away. Using print statements to get the type of the data sped up the debugging process once we realized what might be wrong. In the future, we'll resort first to printing out the types of variables when encountering issues with data from sensors.
 
+## Visualization
+![5](./media/5.gif)
+
 # Finite-State Control
 
 ## Problem
@@ -269,3 +279,6 @@ def run_loop(self):
                     self.state = "drive_square"
                     return
 ```
+
+## Visualization
+![6](./media/6.gif)
