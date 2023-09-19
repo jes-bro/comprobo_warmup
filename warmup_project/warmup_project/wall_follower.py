@@ -1,38 +1,39 @@
 import rclpy
 from rclpy.node import Node # Import super/base class required to create ROS Node
-# Topics are tight so they expect a type of data to go over a topic
-# Topic is channel 
-# Will stuff break if you use different msg types
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Twist, Point
 from sensor_msgs.msg import LaserScan
 from visualization_msgs.msg import Marker
-import tty
-import select
-import sys
-import termios
 import seaborn as sns
 import matplotlib.pyplot as plt
 import numpy as np
 from math import sin, cos, radians
 from time import sleep
+
 class WallFollowerNode(Node):
+    """
+    A ROS node that implements a wall follower algorithm.
+    """
     def __init__(self):
+        """
+        Initialize the node and its subscribers, publishers, and variables.
+        """
         super().__init__('wall_follower_node')
-        # Args: interval between invocations of the timer (period), (callback)
-        self.create_timer(0.1, self.run_loop) # executes run loop 10x a second - how does callback work exactly
-        self.create_timer(0.1, self.run_loop) # executes run loop 10x a second
+        self.create_timer(0.1, self.run_loop)
+        self.create_timer(0.1, self.run_loop)
         self.create_subscription(LaserScan, 'scan', self.process_scan, 10)
-        # create publisher to publish messages to topic
         self.pub = self.create_publisher(Twist, 'cmd_vel', 10)
         self.pub2 = self.create_publisher(Marker, 'visualization_marker', 10)
         self.line_1_distance = 0
         self.line_2_distance = 1
         self.thetas = np.linspace(0, np.pi, 180)
-        self.r_min, self.r_max, self.r_step = -5, 5, 0.025
+        self.r_min, self.r_max, self.r_step = -5, 5, 1
         self.r_values = np.arange(self.r_min, self.r_max + self.r_step, self.r_step)
 
     def process_scan(self, laser_data):
+        """
+        Process incoming LaserScan data to determine distances.
+        """
         self.ranges = np.array(list(laser_data.ranges))
         print(f"ranges: {self.ranges}")
         self.line_1_distance = self.ranges[135]
@@ -40,11 +41,13 @@ class WallFollowerNode(Node):
         print("-------------------------")
         points = self.polar_to_cartesian()
         accumulator = self.generate_hough_space(points)
-        self.generate_heat_map(accumulator)
         self.plot_lines(accumulator)
-        #self.generate_heat_map(accumulator)
 
     def polar_to_cartesian(self):
+        """
+        Convert polar coordinates to cartesian.
+        Returns: List of points in Cartesian coordinates.
+        """
         points = []
         for angle in range(len(self.ranges)):
             point = (self.ranges[angle]*cos(radians(angle)), self.ranges[angle]*sin(radians(angle)))
@@ -52,9 +55,15 @@ class WallFollowerNode(Node):
         return points
 
     def generate_hough_space(self, points):
-
+        """
+        Generate the Hough space from given points.
+        Args:
+        - points (list): List of points to generate Hough space for.
+        
+        Returns: Accumulator matrix representing the Hough space.
+        """
         thetas = np.linspace(0, np.pi, 180)
-        r_min, r_max, r_step = -5, 5, 0.025
+        r_min, r_max, r_step = -5, 5, 1
         r_values = np.arange(r_min, r_max + r_step, r_step)
 
         # Initialize matrix with zeros
@@ -77,6 +86,12 @@ class WallFollowerNode(Node):
         return accumulator
 
     def plot_lines(self, accumulator):
+        """
+        Plot lines based on the Hough transform accumulator.
+        Args:
+        - accumulator (np.ndarray): The Hough transform accumulator matrix.
+        """
+
         max_value = np.max(accumulator)
 
         # Set the threshold as 70% of the max value
@@ -108,6 +123,12 @@ class WallFollowerNode(Node):
             self.publish_line(start_point, end_point)
 
     def publish_line(self, start_point, end_point):
+        """
+        Publish a line to the visualization marker.
+        Args:
+        - start_point (geometry_msgs.msg.Point): Start point of the line.
+        - end_point (geometry_msgs.msg.Point): End point of the line.
+        """
         marker = Marker()
         marker.header.frame_id = "/odom" 
         marker.type = Marker.LINE_LIST
@@ -122,6 +143,11 @@ class WallFollowerNode(Node):
         self.pub2.publish(marker)
 
     def generate_heat_map(self, accumulator):
+        """
+        Generate a heatmap based on the Hough transform accumulator.
+        Args:
+        - accumulator (np.ndarray): The Hough transform accumulator matrix.
+        """
         # Generate a figure and axis
         fig, ax = plt.subplots(figsize=(10, 10))
         
@@ -146,6 +172,11 @@ class WallFollowerNode(Node):
         plt.show()
     
     def move_forward(self, msg):
+        """
+        Command the robot to move forward.
+        Args:
+        - msg (geometry_msgs.msg.Twist): A Twist message to modify and publish.
+        """
         msg.linear.x = 0.05
         msg.angular.z = 0.0
         self.pub.publish(msg)
@@ -153,7 +184,13 @@ class WallFollowerNode(Node):
         msg.linear.x = 0.0
         msg.angular.z = 0.0
         self.pub.publish(msg)
+
     def turn_left(self, msg):
+        """
+        Command the robot to turn left.
+        Args:
+        - msg (geometry_msgs.msg.Twist): A Twist message to modify and publish.
+        """
         msg.angular.z = 0.5
         self.pub.publish(msg)
         sleep(0.1)
@@ -161,12 +198,21 @@ class WallFollowerNode(Node):
         self.pub.publish(msg)
     
     def turn_right(self, msg):
+        """
+        Command the robot to turn right.
+        Args:
+        - msg (geometry_msgs.msg.Twist): A Twist message to modify and publish.
+        """
         msg.angular.z = -0.5
         self.pub.publish(msg)
         sleep(0.1)
         msg.angular.z = 0.0
         self.pub.publish(msg)
+        
     def run_loop(self):
+        """
+        Main loop of the wall follower algorithm. Checks distances and decides on the robot's actions.
+        """
         msg = Twist()
         print("Got here")
         print(self.line_1_distance)
@@ -183,6 +229,7 @@ class WallFollowerNode(Node):
             self.move_forward(msg)
             print("Moving Forward")
         sleep(0.5)
+
 def main():
     rclpy.init()
     node = WallFollowerNode()
