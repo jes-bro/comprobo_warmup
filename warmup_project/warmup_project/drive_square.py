@@ -15,7 +15,6 @@ class DriveSquareNode(Node):
     in a square path. It inherits from the rclpy's Node class and integrates functionalities
     to control the robot's linear and angular velocities at fixed intervals to drive in a square.
     """
-
     def __init__(self):
         super().__init__("square_node")
         self.create_timer(0.1, self.run_loop)
