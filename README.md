@@ -142,7 +142,7 @@ Our wall follower algorithm stays parallel to the wall by ensuring that its dist
 $$|d_1 - d_2| < \epsilon$$
 where 
 * $d_1$ represents the distance measurement taken from the LiDAR at a 45 degree angle
-* d_2 represents the distance measurement taken from the LiDAR at a 135 degree angle
+* $d_2$ represents the distance measurement taken from the LiDAR at a 135 degree angle
 
 If that criteria is not met, we adjust the robots direction by rotating it. If $d_1 > d_2$, we turn right. If $d_2 > d_1$, we turn left.
 
@@ -171,7 +171,7 @@ $$\rho = x\cos(
 Once the $\rho$ value is calculated for each $\theta$ and coordinate pair, we determine which bin (in the discretized Hough space) needs to be incremented. We do this by normalizing with the minimum  $\rho$ value, $\rho_{min}$, and dividing by the resolution of the $\rho$ values ($\rho_{r}$)
 $$\text{bin} = \frac{\rho - \rho_{min}}{\rho_{r}}$$
 
-Here are the specific implementation details:
+Here are the specific implementation details. $\rho$ is `r` in the script and $\theta$ is `theta`. $d_1$ is `line_1_distance` and $d_2$ is `line_2_distance`.
  ~~~python
 def generate_hough_space(self, points):
     
@@ -419,8 +419,10 @@ The greatest hurdle for this project was working with the laser scan data. We we
 The goal for the obstacle avoider is to do just that- avoid obstacles. We noticed early on that the logic for following a person, which involves turning toward something that's close to you, can be reversed engineered so you move away from the thing that's close to you. That was our general approach to solving this problem. Obstacle Avoidance is extremely useful in any environment where there are static or dynamic obstacles in place- its important that robots know how to navigate around these things and achieve their objectives if they are going to do anything meaningul in the real world.
 
 <div style="text-align:center">
-    <img src="./media/r_1.svg" alt="Alt text" width="400">
+    <img src="./media/5_1.svg" alt="Alt text" width="400" height="400">
 </div>
+
+Illustration of obstacle avoider task.
 
 ## Strategy / Structure
 
@@ -454,6 +456,38 @@ Then, once we're centered at zero, an angular error that is negative indicates t
 - **turn_right()** if `angular_error < 0`
 
 Then turn_left or turn_right is called to update the angular velocity components of the Twist message that gets published.
+
+This is implemented in the run_loop as follows. $D$ is called `distance_threshold` and $C$ is called `closest_point` so the variable names more descriptive.
+
+~~~python
+    def run_loop(self):
+        msg = Twist()
+        print("loop")
+        # Check to see if LIDAR data empty
+        if len(self.ranges) == 0:
+            print("Empty!")
+            return
+
+        ranges_copy = self.ranges
+        closest_point = min(ranges_copy)
+        print(f"ranges: {ranges_copy}")
+        print(f"closest point: {closest_point}")
+
+        closest_point_idx = ranges_copy.index(closest_point)
+
+        # Index corresponds to point's angle relative to NEATO
+        angular_error = closest_point_idx - 45
+        print(f"angular error: {angular_error}")
+
+        if abs(self.distance_threshold - closest_point) < 1:
+            if angular_error > 0:
+                self.turn_left(msg)
+            else:
+                self.turn_right(msg)
+
+        self.move_forward(msg)
+        sleep(0.5)
+~~~
 
 ## Challenges
 
