@@ -446,11 +446,8 @@ where
 
 Then, once we're centered at zero, an angular error that is negative indicates that the closest distance is to the left of us, so we want to turn right to avoid the obstacle. If the angular error is positive, that means that the angle corresponding to the closest distance (where the obstacle is) is to the right of us. So, we can express our logic in the following way:
 
-$$\begin{cases} 
-\text{turn\_left()} & \text{if } \text{angular\_error} > 0 \\
-\text{turn\_right()} & \text{if } \text{angular\_error} < 0 
-\end{cases}$$
-
+- **turn_left()** if `angular_error > 0`
+- **turn_right()** if `angular_error < 0`
 
 Then turn_left or turn_right is called to update the angular velocity components of the Twist message that gets published.
 
