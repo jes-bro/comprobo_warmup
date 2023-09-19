@@ -315,6 +315,7 @@ The heat map generation is commented out from the node initialization because it
 
 Compared to wall following, person following adds the complexity of having to follow a _moving_ target while igorning objects that are farther away in its view. In this problem, the NEATO should scan the area in front of it using its laser scanner. Once an object is detected, the NEATO should orient itself to remain a predetermined distance away from the object. In case multiple objects are in the NEATO's view, the NEATO should follow the closest object. A successful outcome to this task looks like: If the NEATO doesn't see anything directly in front of it, it should remain stationary. Once an object enters its view box the neato should first turn to face the object and then move forward or backward to remain at the proper distance from the object.
 
+
 ## Strategy / Structure
 
 We found that this problem can be divided into two parts: gathering the distance data within the NEATO's view box and orienting itself with the target based on the gathered data.
@@ -331,7 +332,11 @@ We found that this problem can be divided into two parts: gathering the distance
     <img src="./media/4_2.svg" alt="Alt text" width="400">
 </div>
 
-Before tackling these two sub problems, we had to decide on what an object is to our NEATO. We came up with the simplest solution: the NEATO will treat the point from the laser scan that is closest to it as its target. The laser scan data comes in the form of a list with 360 elements (1 distance scan for each degree around the NEATO). We sliced the list to only get the points that were in front of the NEATO and discaded points that were further than we wanted the NEATO to track. First we took 0 - 45 degrees which were indicies 0 - 45 of the scan list. Then we took -45 - 0 degrees which were indicies 314 - 359. Reversing both lists and concatenating them together yields the laser ranged distances at angles -45 - 45 degrees.
+Before tackling these two sub problems, we had to decide on what an object is to our NEATO. We came up with the simplest solution: the NEATO will treat the point from the laser scan that is closest to it as its target. The laser scan data comes in the form of a list with 360 elements (1 distance scan for each degree around the NEATO). We sliced the list to only get the points that were in front of the NEATO and discaded points that were further than we wanted the NEATO to track. This is achieved by combining reversed ranges from the left and right sides of the robot:
+
+$$\text{ranges_front}=\text{reverse}(ranges_left)+\text{reverse}(\text{ranges_right})ranges_front=\text{reverse}(\text{ranges_left})+\text{reverse}(\text{ranges_right})$$
+
+First we took 0 - 45 degrees which were indicies 0 - 45 of the scan list. Then we took -45 - 0 degrees which were indicies 314 - 359. Reversing both lists and concatenating them together yields the laser ranged distances at angles -45 - 45 degrees.
 
 ```python
 ...
