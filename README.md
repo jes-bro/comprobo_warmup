@@ -190,7 +190,7 @@ def generate_hough_space(self, points):
 Then, we use a Seaborn heatmap to illustrate the “hottest” bins with the highest value/number of votes. The $\rho-\theta$ pairs in the hottest 30% of bins are converted back into lines represented by markers. Those markers are then published to their own topic so the detected wall can be visualized in RViz. We calculate our threshold in this way so that it is dynamic and not reliant on hard-coded values that vary depending on the situation. For the sake of time, the Hough Transform does not influence our wall following- it simply serves to detect the walls and in the future could be used to follow walls.
 
 <div style="text-align:center">
-    <img src="./media/hough space.png" alt="Alt text" width="2000">
+    <img src="./media/hough space.png" alt="Alt text" width="1000">
 </div> 
 
 Here are the details of the heat map and wall visualizations: 
