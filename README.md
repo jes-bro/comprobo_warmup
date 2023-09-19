@@ -132,7 +132,21 @@ Finding the correct timings of to get a 90 degree turn was tedious and could be 
 
 # Wall Following
 
-The goal of this task was to perform wall-following using laser-scan data. As an extension, we decided to perform wall detection using a Hough Transform with $\rho-\theta$ parameterization, where 
+The goal of this task was to perform wall-following using laser-scan data. 
+
+Our wall follower algorithm stays parallel to the wall by ensuring that its distance measurement at a 45 degree angle and at a 135 degree angle remain close within some threshold $\epsilon$
+$$|d_1 - d_2| < \epsilon$$
+where 
+* $d_1$ represents the distance measurement taken from the LiDAR at a 45 degree angle
+* d_2 represents the distance measurement taken from the LiDAR at a 135 degree angle
+
+If that criteria is not met, we adjust the robots direction by rotating it. If $d_1 > d_2$, we turn right. If $d_2 > d_1$, we turn left.
+
+We execute the turns by updating the angular velocities of the Twist messages. We adjust the angular velocities about the z-axis.
+
+In our script, $\epsilon=0.1$
+
+As an extension, we decided to perform wall detection using a Hough Transform with $\rho-\theta$ parameterization, where 
 * $\rho$ is the perpendicular distance from the origin and 
 * $\theta$ is the angle from the x axis to $\rho$
  
