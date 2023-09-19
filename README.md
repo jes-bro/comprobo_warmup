@@ -189,6 +189,10 @@ def generate_hough_space(self, points):
 ~~~
 Then, we use a Seaborn heatmap to illustrate the “hottest” bins with the highest value/number of votes. The $\rho-\theta$ pairs in the hottest 30% of bins are converted back into lines represented by markers. Those markers are then published to their own topic so the detected wall can be visualized in RViz. We calculate our threshold in this way so that it is dynamic and not reliant on hard-coded values that vary depending on the situation. For the sake of time, the Hough Transform does not influence our wall following- it simply serves to detect the walls and in the future could be used to follow walls.
 
+<div style="text-align:center">
+    <img src="./media/hough space.png" alt="Alt text" width="2000">
+</div> 
+
 Here are the details of the heat map and wall visualizations: 
 ~~~python
 def plot_lines(self, accumulator):
@@ -272,14 +276,12 @@ def generate_heat_map(self, accumulator):
     # Display the heatmap
     plt.show()
 ~~~
-
-
+&nbsp; 
 <div style="text-align:center">
     <img src="./media/p5_1.png" alt="Alt text" width="2000">
 </div> 
 Screenshot of wall detection in RViz with Marker topic displayed during wall follower run
-
-
+&nbsp; 
 Within the class, attributes were initialized to store the minimum, maximum, and step values of $\rho$, making these parameters universally accessible across functions. The minimum, maximum, and step values were used to create discretized buckets in the Hough space. We also establish a linspace of thetas, ranging from 0 to 180 degrees. For a line in Cartesian space, there are two equivalent representations in Hough space that are 180 degrees apart. Therefore, using a full 360 degrees would introduce redundancy. In the script, all angles were kept in radians for simplicity’s sake. 
 
 Additionally, to simplify data processing, the laser range data was converted into a standard list format, avoiding the complications inherent to array syntax (the default type of the laser range data is array.array, which is slightly more complicated to index).
