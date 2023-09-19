@@ -411,7 +411,7 @@ Notice that we reused the move functions from previous projects, another benefit
 The greatest hurdle for this project was working with the laser scan data. We weren't aware that the data is given in an array format which took much of our development time away. Using print statements to get the type of the data sped up the debugging process once we realized what might be wrong. We also found issues with using the reverse method on our laser scan list, so we resorted to manually reversing the data using a for loop (not clean!). In the future, we'll resort first to printing out the types of variables when encountering issues with data from sensors.
 
 ## Visualization
-![5](./media/5.gif)
+![6](./media/6.gif)
 
 # Obstacle Avoider
 
@@ -455,6 +455,8 @@ Then turn_left or turn_right is called to update the angular velocity components
 
 In all honesty not many obstacles were encountered during this section because the logic is so similar to that of the person following implementation. We did try to implement a correction at the end so that the robot would correct its angle and continue going where it was before, but we realized that the way we were doing that was very specific to the particular environment setup and would not generalize well to other ones. So, we decided to not implement the approach for correction. Our initial approach for correction involved using flags to denote whether a robot has rotated and which direction it has rotated about, so that we can then tell it to rotate in the opposite direction as it moves forward. This presented some minor implementation challenges that we decided were not worth spending a lot more time on.
 
+## Visualization
+![5](./media/5.gif)
 
 # Finite-State Control
 
@@ -514,7 +516,6 @@ Walking through the state transitions is simple for this example. The NEATO star
 There are many ways to handle the state change between the drive_square and follow_person state. A better way (in this simple case) is to get rid of the state attribute and soley determine the state based on the is_no_detection variable with a simple if statement. This structure would work well for a simple case, but for a more complicated state it's better to name a state variable to make the code more readable. Deciding to keep the code more "efficient" vs more readable was a challenge during this sub-project.
 
 ## Visualization
-![6](./media/6.gif)
 
 # Key Takeaways
 One of the main takeaways we learned from doing this series of projects is that planning out the logic for programs ahead of writing them is extremely beneficial and can help clarify how an implementation should be done-taking the guess-work out of it. We also learned that documenting as you go is far more beneficial than cramming in all documentation at the end of the project. It helps with remembering small details and the specific lessons to take into future projects.
