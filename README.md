@@ -280,6 +280,7 @@ def generate_heat_map(self, accumulator):
 <br/><br/>
 <br/><br/>
 
+<p align="center">## Wall Dectection in RViz
 <div style="text-align:center">
     <img src="./media/p5_1.png" alt="Alt text" width="2000">
 </div> 
