@@ -418,6 +418,10 @@ The greatest hurdle for this project was working with the laser scan data. We we
 ## Problem
 The goal for the obstacle avoider is to do just that- avoid obstacles. We noticed early on that the logic for following a person, which involves turning toward something that's close to you, can be reversed engineered so you move away from the thing that's close to you. That was our general approach to solving this problem. Obstacle Avoidance is extremely useful in any environment where there are static or dynamic obstacles in place- its important that robots know how to navigate around these things and achieve their objectives if they are going to do anything meaningul in the real world.
 
+<div style="text-align:center">
+    <img src="./media/r_1.svg" alt="Alt text" width="400">
+</div>
+
 ## Strategy / Structure
 
 The logic for our obstacle avoider node is very similar to that of the person follower:
