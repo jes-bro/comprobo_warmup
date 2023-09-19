@@ -14,7 +14,6 @@ class TeleopNode(Node):
     It extends the rclpy's Node class and integrates functionalities to get keyboard inputs
     and to publish messages to control robot's movement based on the input.
     """
-
     def __init__(self):
         super().__init__("teleop_node")
         # Args: interval between invocations of the timer (period), (callback)
