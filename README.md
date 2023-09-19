@@ -334,9 +334,11 @@ We found that this problem can be divided into two parts: gathering the distance
 
 Before tackling these two sub problems, we had to decide on what an object is to our NEATO. We came up with the simplest solution: the NEATO will treat the point from the laser scan that is closest to it as its target. The laser scan data comes in the form of a list with 360 elements (1 distance scan for each degree around the NEATO). We sliced the list to only get the points that were in front of the NEATO and discaded points that were further than we wanted the NEATO to track. This is achieved by combining reversed ranges from the left and right sides of the robot:
 
-$$\text{ranges_front}=\text{reverse}(ranges_left)+\text{reverse}(\text{ranges_right})ranges_front=\text{reverse}(\text{ranges_left})+\text{reverse}(\text{ranges_right})$$
+$$\text{ranges front}=\text{reverse}(\text{ranges left})+\text{reverse}(\text{ranges right})$$
 
 First we took 0 - 45 degrees which were indicies 0 - 45 of the scan list. Then we took -45 - 0 degrees which were indicies 314 - 359. Reversing both lists and concatenating them together yields the laser ranged distances at angles -45 - 45 degrees.
+
+$$\text{angular error}=\text{closest point index} − 45$$
 
 ```python
 ...
