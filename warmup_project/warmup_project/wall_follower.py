@@ -7,8 +7,13 @@ import tty
 import select
 import sys
 import termios
+import seaborn as sns
+import matplotlib.pyplot as plt
+import numpy as np
+from math import sin, cos, radians
 from time import sleep
 import math
+
 
 
 class WallFollowerNode(Node):
@@ -30,6 +35,9 @@ class WallFollowerNode(Node):
         # Initializing distances to keep track of distance to lines detected
         self.line_1_distance = 0
         self.line_2_distance = 1
+        self.thetas = np.linspace(0, np.pi, 180)
+        self.r_min, self.r_max, self.r_step = -5, 5, 0.025
+        self.r_values = np.arange(self.r_min, self.r_max + self.r_step, self.r_step)
 
     def process_scan(self, laser_data):
         """Process laser scan data to update line distances."""
@@ -76,6 +84,7 @@ class WallFollowerNode(Node):
             self.move_forward(msg)
 
         sleep(0.5)  # Pause before the next loop iteration
+
 
 def main():
     """Main function to initialize ROS and spin the node."""
